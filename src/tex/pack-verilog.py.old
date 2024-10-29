@@ -1,0 +1,116 @@
+#!/usr/bin/python
+
+tex = open("transforms.tex", 'r')
+ver = open("transforms.v", 'w')
+print("trying to open transforms.tex")
+linestoread=2
+line = 0
+lhsdict = {}
+rhsdict = {}
+startline = """module transformer(input [5:0] line, input [5:0] char, output [7:0] lhs, output [7:0] rhs);\n 
+reg [7:0] local_addr;
+
+reg [23:0] addr;
+
+wire [5:0] lhs_start, lhs_stop;
+wire [5:0] rhs_start, rhs_stop;
+
+assign lhs_start = addr[5:0];
+assign rhs_start = addr[11:6];
+assign lhs_len = addr[17:12];
+assign rhs_len = addr[23:18];
+
+// gets the appropriate indices for each line
+line_mapper line_mapper(
+    .txform(line),
+    .addr(addr)
+);
+
+reg [5:0] lhs_char_counter;
+reg [5:0] rhs_char_counter;
+
+reg lhs_or_rhs;
+
+always @(posedge clk) begin
+    if (~rst)
+        lhs_char_counter <= 0;
+        rhs_char_counter <= 0;
+        lhs_or_rhs <= 0;
+"""
+
+
+startline2 = "module line_mapper(input wire [5:0] txform, output reg [23:0] addr);\n"
+
+
+
+
+midline = """
+always @(*) begin
+case(memaddr)
+"""
+ver.write(startline)
+lhscnt = 0
+rhscnt = 0
+addr = 0
+while linestoread>0:
+    try:
+        lhs, rhs = tex.readline().split(",")
+        lhs = lhs[7:]
+        rhs = rhs[0:-4]
+        lhs = lhs.strip()
+        rhs = rhs.strip()
+        print(lhs)
+        print(rhs)
+        strtowrite = ""
+        lhsl = len(lhs)
+        rhsl = len(rhs)
+        print(lhsl, rhsl) 
+        for char in range(lhsl):
+            strtowrite += "    8'b" + '{0:08b}'.format(addr + char) + ": dout <= 8'b" + '{0:08b}'.format(ord(lhs[char]))+ "\n"
+        lhsdict[line] = [addr, lhsl]
+        addr += lhsl + 1
+        for char in range(rhsl):
+            strtowrite += "    8'b" + '{0:08b}'.format(addr + char) + ": dout <= 8'b" + '{0:08b}'.format(ord(rhs[char])) + "\n"
+        rhsdict[line] = [addr, rhsl]
+        addr += rhsl
+        
+        lhscnt += lhsl
+        rhscnt += rhsl
+        print(strtowrite)
+        ver.write(strtowrite + "\n")
+        linestoread -= 1
+        line += 1
+    except:
+        print('out of lines')
+        tex.close()
+        ver.close()
+        break
+
+linestowrite = len(lhsdict)
+print("writing " + str(linestowrite) + " lines")
+line = 0
+print("lhs dict, line: [start, chars]")
+print(lhsdict)
+print("rhs dict, line: [start, chars]")
+print(rhsdict)
+while linestowrite >0:
+    str_to_write = ""
+    number_of_this_line = "{0:06b}".format(rhsdict[line][1]) + "{0:06b}".format(lhsdict[line][1]) + "{0:06b}".format(rhsdict[line][0]) + "{0:06b}".format(lhsdict[line][0])
+    str_to_write += "    " + "{0:08b}".format(line) + ": addr <= 24'b" + number_of_this_line + ";"
+    print(str_to_write)
+    linestowrite -= 1
+    line += 1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
