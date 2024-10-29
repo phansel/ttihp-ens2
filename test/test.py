@@ -21,7 +21,7 @@ async def test_txformer(dut):
     dut.ena.value = 1;
     dut.ui_in.value = 0b10000000
     cocotb.start_soon(clock.start())
-    tex = open("tex/transforms.tex", "r")
+    tex = open("../src/tex/transforms.tex", "r")
     dut._log.info("start")
     dut._log.info("check that our expected transforms are seen")
     total_txforms = 44
