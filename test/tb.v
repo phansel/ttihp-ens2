@@ -22,10 +22,10 @@ module tb();
     end
 
     tt_um_phansel_laplace_lut tt_um_laplace_lut_1 (
-    `ifdef GL_TEST
-        .VPWR( 1'b1),
-        .VGND( 1'b0),
-    `endif
+    //`ifdef GL_TEST
+    //    .VPWR( 1'b1),
+    //    .VGND( 1'b0),
+    //`endif
     .ui_in(ui_in),
     .uo_out(uo_out),
     .uio_in(uio_in),
