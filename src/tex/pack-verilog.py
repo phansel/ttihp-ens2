@@ -3,7 +3,7 @@
 tex = open("transforms.tex", 'r')
 ver = open("../transforms.v", 'w')
 print("trying to open transforms.tex")
-linestoread=46
+linestoread=47
 line = 0
 
 startmemline = """module memory_chars(
